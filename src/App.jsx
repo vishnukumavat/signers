@@ -122,33 +122,24 @@ function App() {
 
       await window.keplr.enable(chainConfig.chainId);
       const offlineSigner = window.keplr.getOfflineSigner(chainConfig.chainId);
-      const accounts = await offlineSigner.getAccounts();
-      const account = accounts[0];
+      const [account] = await offlineSigner.getAccounts();
 
       let signedData;
       if (chainConfig.coinType === "60") {
-        // Get ETH address for EVM chains
-        const key = await window.keplr.getKey(chainConfig.chainId);
-        const ethAddress = key.ethereumHexAddress;
-        
         // EVM signing
-        const pubKey = account.pubkey;
-        const pubKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(pubKey)));
-        
         signedData = await window.keplr.signEthereum(
           chainConfig.chainId,
           account.address,
           message,
           "message"
         );
-        const signatureHex = '0x' + Array.from(signedData, byte => 
-          byte.toString(16).padStart(2, '0')).join('');
-        
+        const signatureHex = '0x' + Array.from(signedData, byte => byte.toString(16).padStart(2, '0')).join('');
+
         setResult({
           wallet: "Keplr",
           address: account.address,
-          ethAddress: ethAddress,
-          pubKey: pubKeyBase64,
+          ethAddress: (await window.keplr.getKey(chainConfig.chainId)).ethereumHexAddress,
+          pubKey: Buffer.from(account.pubkey).toString('base64'),
           message: message,
           signature: signatureHex
         });
@@ -234,19 +225,14 @@ function App() {
 
       await window.leap.enable(chainConfig.chainId);
       const offlineSigner = window.leap.getOfflineSigner(chainConfig.chainId);
-      const accounts = await offlineSigner.getAccounts();
-      const account = accounts[0];
+      const [account] = await offlineSigner.getAccounts();
 
       let signedData;
       if (chainConfig.coinType === "60") {
-        const pubKeyBase64 = Buffer.from(account.pubkey).toString('base64');
-        const cosmosAddress = account.address;
-        const ethAddress = '0x' + toHex(fromBech32(cosmosAddress).data);
-        
         // EVM signing
         signedData = await window.leap.signEthereum(
           chainConfig.chainId,
-          cosmosAddress,
+          account.address,
           message,
           "message"
         );
@@ -255,9 +241,9 @@ function App() {
         
         setResult({
           wallet: "Leap",
-          address: cosmosAddress,
-          ethAddress: ethAddress,
-          pubKey: pubKeyBase64,
+          address: account.address,
+          ethAddress:  '0x' + toHex(fromBech32(account.address).data),
+          pubKey: Buffer.from(account.pubkey).toString('base64'),
           message: message,
           signature: signatureHex
         });
@@ -303,18 +289,14 @@ function App() {
         const web3 = new Web3(window.ethereum);
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         
-        const accounts = await web3.eth.getAccounts();
-        const account = accounts[0];
-
-        const cosmosAddress = toBech32(chainConfig.prefix, fromHex(account.replaceAll(/^0x/g, "")));
-        
+        const [account] = await web3.eth.getAccounts();
         const signature = await web3.eth.personal.sign(message, account, account);
         
         setResult({
           wallet: "MetaMask",
-          address: cosmosAddress,
+          address: toBech32(chainConfig.prefix, fromHex(account.replaceAll(/^0x/g, ""))),
           ethAddress: account,
-          pubKey: account, // Use account address as pubkey for MetaMask EVM
+          pubKey: account, // Use account address as pubkey for MetaMask
           message: message,
           signature: signature
         });
@@ -402,10 +384,6 @@ function App() {
             },
           },
         });
-
-        
-        console.log("accountData - ", accountData);
-        console.log("signResponse - ", signResponse);
 
         setResult({
           wallet: "MetaMask Cosmos",
