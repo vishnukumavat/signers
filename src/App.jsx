@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing"
 import { ethers } from 'ethers'
 import { fromBech32, fromHex, toBech32, toHex } from "@cosmjs/encoding";
+import { Secp256k1 } from "@cosmjs/crypto";
+import { toBase64, toUtf8 } from "@cosmjs/encoding";
+import { sha256 } from "@cosmjs/crypto";
 
 import './App.css'
 
@@ -459,40 +462,20 @@ function App() {
           const cleanPrivateKey = privateKey.replace('0x', '');
           const privateKeyBytes = Buffer.from(cleanPrivateKey, 'hex');
           const wallet = await DirectSecp256k1Wallet.fromKey(privateKeyBytes, chainConfig.prefix);
-          const accounts = await wallet.getAccounts();
-          const account = accounts[0];
+          const [ account ] = await wallet.getAccounts();
 
-          const signDoc = {
-            chain_id: "",
-            account_number: '0',
-            sequence: '0',
-            fee: {
-              gas: '0',
-              amount: [],
-            },
-            msgs: [
-              {
-                type: 'sign/MsgSignData',
-                value: {
-                  signer: account.address,
-                  data: btoa(message),
-                },
-              },
-            ],
-            memo: '',
-          };
-
-          const signedData = await wallet.signDirect(
-            account.address,
-            signDoc
-          );
+          // Sign the message
+          const messageHash = sha256(toUtf8(message));
+          const signature = await Secp256k1.createSignature(messageHash, privateKeyBytes);
+          const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
+          const signatureBase64 = toBase64(signatureBytes);
 
           setResult({
             wallet: "Web3Auth",
             address: account.address,
-            pubKey: signedData.signature.pub_key.value,
+            pubKey: Buffer.from(account.pubkey).toString('base64'),
             message: message,
-            signature: signedData.signature.signature
+            signature: signatureBase64
           });
         } catch (err) {
           setError("Invalid private key for Cosmos wallet: " + err.message);
