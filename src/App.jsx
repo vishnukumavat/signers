@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing"
 import { ethers } from 'ethers'
+import { fromBech32, fromHex, toBech32, toHex } from "@cosmjs/encoding";
+
 import './App.css'
 
 function App() {
@@ -234,17 +236,14 @@ function App() {
 
       let signedData;
       if (chainConfig.coinType === "60") {
-        // Get ETH address for EVM chains
-        const key = await window.leap.getKey(chainConfig.chainId);
-        const ethAddress = key.ethereumHexAddress;
+        const pubKeyBase64 = Buffer.from(account.pubkey).toString('base64');
+        const cosmosAddress = account.address;
+        const ethAddress = '0x' + toHex(fromBech32(cosmosAddress).data);
         
         // EVM signing
-        const pubKey = account.pubkey;
-        const pubKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(pubKey)));
-        
         signedData = await window.leap.signEthereum(
           chainConfig.chainId,
-          account.address,
+          cosmosAddress,
           message,
           "message"
         );
@@ -253,7 +252,7 @@ function App() {
         
         setResult({
           wallet: "Leap",
-          address: account.address,
+          address: cosmosAddress,
           ethAddress: ethAddress,
           pubKey: pubKeyBase64,
           message: message,
@@ -303,12 +302,15 @@ function App() {
         
         const accounts = await web3.eth.getAccounts();
         const account = accounts[0];
+
+        const cosmosAddress = toBech32(chainConfig.prefix, fromHex(account.replaceAll(/^0x/g, "")));
         
         const signature = await web3.eth.personal.sign(message, account, account);
         
         setResult({
           wallet: "MetaMask",
-          address: account,
+          address: cosmosAddress,
+          ethAddress: account,
           pubKey: account, // Use account address as pubkey for MetaMask EVM
           message: message,
           signature: signature
@@ -430,13 +432,20 @@ function App() {
       if (chainConfig.coinType === "60") {
         // For EVM chains, use ethers.js
         try {
-          const wallet = new ethers.Wallet(privateKey);
-          const signature = await wallet.signMessage(message);
+          const ethWallet = new ethers.Wallet(privateKey);
+          const signature = await ethWallet.signMessage(message);
+
+          const privateKeyBytes = Buffer.from(privateKey, 'hex');
+          const cosmosWallet = await DirectSecp256k1Wallet.fromKey(privateKeyBytes, chainConfig.prefix);
+          const cosmosAccount = (await cosmosWallet.getAccounts())[0];
+          const cosmosPubKey = Buffer.from(cosmosAccount.pubkey).toString('base64');
+          const cosmosAddress = toBech32(chainConfig.prefix, fromHex(ethWallet.address.replaceAll(/^0x/g, "")));
           
           setResult({
             wallet: "Web3Auth",
-            address: wallet.address,
-            pubKey: wallet.address, // Use address as pubkey for EVM
+            address: cosmosAddress,
+            ethAddress: ethWallet.address,
+            pubKey: cosmosPubKey,
             message: message,
             signature: signature
           });
