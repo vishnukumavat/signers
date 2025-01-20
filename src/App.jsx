@@ -472,19 +472,19 @@ function App() {
       
       <div className="config-section">
         <h2>Chain Configuration</h2>
+        
         <div className="input-row">
           <div className="input-group">
-            <label>
-              Chain ID:
-              <input
-                type="text"
-                value={chainConfig.chainId}
-                onChange={(e) => setChainConfig({...chainConfig, chainId: e.target.value})}
-                placeholder={defaultConfigs[chainConfig.coinType].placeholder}
-              />
-            </label>
+            <label htmlFor="chainId">Chain ID:</label>
+            <input
+              id="chainId"
+              type="text"
+              value={chainConfig.chainId}
+              onChange={(e) => setChainConfig({...chainConfig, chainId: e.target.value})}
+              placeholder={defaultConfigs[chainConfig.coinType].placeholder}
+            />
             <div className="input-note">
-              Note: {chainConfig.coinType === "60" ? 
+              {chainConfig.coinType === "60" ? 
                 "For EVM chains, use underscore format (chainname_local-1)" : 
                 "For Cosmos chains, use hyphen format (chainname-1)"
               }
@@ -492,99 +492,90 @@ function App() {
           </div>
 
           <div className="input-group">
-            <label>
-              Chain Name:
-              <input
-                type="text"
-                value={chainConfig.chainName}
-                onChange={(e) => setChainConfig({...chainConfig, chainName: e.target.value})}
-                placeholder="e.g., Custom Chain"
-              />
-            </label>
+            <label htmlFor="chainName">Chain Name:</label>
+            <input
+              id="chainName"
+              type="text"
+              value={chainConfig.chainName}
+              onChange={(e) => setChainConfig({...chainConfig, chainName: e.target.value})}
+              placeholder="e.g., Custom Chain"
+            />
           </div>
         </div>
 
-        <div className="input-row">
+        <div className="input-row token-config-row">
           <div className="input-group">
-            <label>
-              Address Prefix:
-              <input
-                type="text"
-                value={chainConfig.prefix}
-                onChange={(e) => setChainConfig({...chainConfig, prefix: e.target.value})}
-                placeholder="e.g., allin"
-              />
-            </label>
+            <label htmlFor="prefix">Address Prefix:</label>
+            <input
+              id="prefix"
+              type="text"
+              value={chainConfig.prefix}
+              onChange={(e) => setChainConfig({...chainConfig, prefix: e.target.value})}
+              placeholder="e.g., allin"
+            />
           </div>
 
           <div className="input-group">
-            <label>
-              Coin Type:
-              <select
-                value={chainConfig.coinType}
-                onChange={handleCoinTypeChange}
-              >
-                <option value="60">EVM (60)</option>
-                <option value="118">Cosmos (118)</option>
-              </select>
-            </label>
+            <label htmlFor="coinType">Coin Type:</label>
+            <select
+              id="coinType"
+              value={chainConfig.coinType}
+              onChange={handleCoinTypeChange}
+            >
+              <option value="60">EVM (60)</option>
+              <option value="118">Cosmos (118)</option>
+            </select>
             {showCoinTypeWarning && (
               <div className="warning-message">
                 ⚠️ Important: After changing coin type, please remove the chain from Keplr and add it again if you keep the same chain ID.
               </div>
             )}
           </div>
-        </div>
 
-        <div className="input-row">
           <div className="input-group">
-            <label>
-              Token Name:
-              <input
-                type="text"
-                value={chainConfig.tokenName}
-                onChange={(e) => setChainConfig({...chainConfig, tokenName: e.target.value})}
-                placeholder="e.g., TOKEN"
-              />
-            </label>
+            <label htmlFor="tokenName">Token Name:</label>
+            <input
+              id="tokenName"
+              type="text"
+              value={chainConfig.tokenName}
+              onChange={(e) => setChainConfig({...chainConfig, tokenName: e.target.value})}
+              placeholder="e.g., TOKEN"
+            />
           </div>
 
           <div className="input-group">
-            <label>
-              Token Denom:
-              <input
-                type="text"
-                value={chainConfig.tokenDenom}
-                onChange={(e) => setChainConfig({...chainConfig, tokenDenom: e.target.value})}
-                placeholder="e.g., token"
-              />
-            </label>
+            <label htmlFor="tokenDenom">Token Denom:</label>
+            <input
+              id="tokenDenom"
+              type="text"
+              value={chainConfig.tokenDenom}
+              onChange={(e) => setChainConfig({...chainConfig, tokenDenom: e.target.value})}
+              placeholder="e.g., token"
+            />
           </div>
         </div>
 
         <div className="input-row">
           <div className="input-group">
-            <label>
-              RPC Endpoint:
-              <input
-                type="text"
-                value={chainConfig.rpc}
-                onChange={(e) => setChainConfig({...chainConfig, rpc: e.target.value})}
-                placeholder="e.g., https://rpc.example.com"
-              />
-            </label>
+            <label htmlFor="rpc">RPC Endpoint:</label>
+            <input
+              id="rpc"
+              type="text"
+              value={chainConfig.rpc}
+              onChange={(e) => setChainConfig({...chainConfig, rpc: e.target.value})}
+              placeholder="e.g., https://rpc.example.com"
+            />
           </div>
 
           <div className="input-group">
-            <label>
-              REST Endpoint:
-              <input
-                type="text"
-                value={chainConfig.rest}
-                onChange={(e) => setChainConfig({...chainConfig, rest: e.target.value})}
-                placeholder="e.g., https://rest.example.com"
-              />
-            </label>
+            <label htmlFor="rest">REST Endpoint:</label>
+            <input
+              id="rest"
+              type="text"
+              value={chainConfig.rest}
+              onChange={(e) => setChainConfig({...chainConfig, rest: e.target.value})}
+              placeholder="e.g., https://rest.example.com"
+            />
           </div>
         </div>
       </div>
@@ -592,15 +583,14 @@ function App() {
       <div className="signing-section">
         <h2>Message Signing</h2>
         <div className="input-group full-width">
-          <label>
-            Message:
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter message to sign"
-            />
-          </label>
+          <label htmlFor="message">Message:</label>
+          <input
+            id="message"
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Enter message to sign"
+          />
         </div>
 
         <div className="toggle-container">
@@ -610,9 +600,7 @@ function App() {
               checked={isPrivateKeyMode}
               onChange={(e) => {
                 setIsPrivateKeyMode(e.target.checked);
-                if (!e.target.checked) {
-                  setPrivateKey("");
-                }
+                if (!e.target.checked) setPrivateKey("");
               }}
             />
             <span className="toggle-slider"></span>
@@ -622,15 +610,14 @@ function App() {
 
         {isPrivateKeyMode && (
           <div className="input-group full-width">
-            <label>
-              Private Key (Hex):
-              <input
-                type="password"
-                value={privateKey}
-                onChange={(e) => setPrivateKey(e.target.value)}
-                placeholder="Enter private key in hex format"
-              />
-            </label>
+            <label htmlFor="privateKey">Private Key (Hex):</label>
+            <input
+              id="privateKey"
+              type="password"
+              value={privateKey}
+              onChange={(e) => setPrivateKey(e.target.value)}
+              placeholder="Enter private key in hex format"
+            />
           </div>
         )}
 
